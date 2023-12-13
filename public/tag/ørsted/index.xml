@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ørsted | Lucas Bagge</title>
+    <link>/tag/%C3%B8rsted/</link>
+      <atom:link href="/tag/%C3%B8rsted/index.xml" rel="self" type="application/rss+xml" />
+    <description>Ørsted</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Lucas Bagge, 2023</copyright><lastBuildDate>Thu, 07 Jan 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>Ørsted</title>
+      <link>/tag/%C3%B8rsted/</link>
+    </image>
+    
+    <item>
+      <title>Cargo classification</title>
+      <link>/post/cargo-classification/</link>
+      <pubDate>Thu, 07 Jan 2021 00:00:00 +0000</pubDate>
+      <guid>/post/cargo-classification/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Amagerværket has two units 1 and 4 which produces heat and power using
+respectively wood pellets and wood chips as fuel. The fuel arrives to the plant
+by vessel and it is possible to track the arrivals through Copenhagen Malmö (CM)
+Port&amp;rsquo;s website. However, it is not directly possible to identify if the cargo of
+a given ship is either wood pellets or wood chips. Consequently, the objective
+is to build a model capable of classifying the vessels.&lt;/p&gt;
+&lt;p&gt;With the newly inaugurated wood chips fired unit 4 at Amagerværket and
+expectedly using well above 1 Mt of wood chips per year, the plant has
+suddenly&amp;mdash;and by a substantial margin&amp;mdash;become the largest player in the market
+for wood chips delivered by vessel. To maintain market visibility and have the
+best possible information to act in the biomass market, it is of importance to
+BIO Markets to have information about the arrival and consumption of biomass at
+Amagerværket.&lt;/p&gt;
+&lt;p&gt;The objective of this analysis is&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;build a model that accurately and automatically classify vessels arriving to
+Amagerværket into groups according to cargo type&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;the-data-set&#34;&gt;The data set&lt;/h2&gt;
+&lt;p&gt;For building our model we need to collect the 
+&lt;a href=&#34;https://www.cmport.com/terminals/ships-in-port/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;cmport
+data&lt;/a&gt;
+. Here we have used web
+scraping techniques to extract the data that is essential for us to build our
+model.&lt;/p&gt;
+&lt;p&gt;The site is being updated on a regular basis, so our script that scrapes the
+data is running three times a day.&lt;/p&gt;
+&lt;p&gt;As a first analysis task we need to collect information about the port and if
+there were information on how we could classify the cargoes. We got great insight
+from colleagues that have tracked the cargoes for a long time and they gave us
+the information that &lt;code&gt;quay&lt;/code&gt;, and &lt;code&gt;arriving from&lt;/code&gt; could help us
+differentiated between the cargoes.&lt;/p&gt;
+&lt;p&gt;We need to explore the data for understanding it better and look at the outcome
+variable and the predictor we are considering being of most used for us.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;gross_feature_set %&amp;gt;% kbl() %&amp;gt;% kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;margin-left: auto; margin-right: auto;&#34;&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; feature &lt;/th&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; description &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; eta &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Estimated time of arrival &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; etd &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Estimated time of departure &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; name &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Vessel name &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; company &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The shipping company carrying out the charter &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The location from the vessel is arriving (not necessarily the loading port) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; nationality &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The country under whose laws the vessel is registered or licensed &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; vessel_type &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The types os the vessel arriving &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; purpose &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Give us the purpose of the vessel &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; call_no &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; CM Port call number &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; length &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Length of the vessel &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; width &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Width of the vessel &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; brt &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Gross Register Tonnage (GRT) of the vessel &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; imo &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The international Maritime Organization number &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; The quay at Amagerværket to which the vessel is assigned &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The available dataset consists of &lt;code&gt;\(N = 129\)&lt;/code&gt;
+observations of vessel arrivals&amp;mdash;also named port calls or just calls&amp;mdash;to
+Amagerværket each with 129 features. In the
+current context not every feature is important, but those deemed important for
+our model are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;cargo&lt;/code&gt;: Specifies if the vessel carries wood chips (WC) or wood pellets (WP)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;arriving_from&lt;/code&gt;: The port/city where the cargo is being loaded&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;quay&lt;/code&gt;: The quay at Amagerværket where the cargo is discharged&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The &lt;code&gt;cargo&lt;/code&gt; variable is our outcome variable and the one we want to classify.&lt;/p&gt;
+&lt;h3 id=&#34;the-cargo&#34;&gt;The cargo&lt;/h3&gt;
+&lt;p&gt;Here we can see that there is 105 ships with WC and WP with 24. We don´t have an
+equal amount of both cargoes and that is something that need to be considered in
+the preprocessing step.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;vessels %&amp;gt;% 
+  count(cargo) %&amp;gt;%   
+  ggplot(aes(x = cargo, y = n, fill = cargo)) +
+  geom_col() +
+  geom_text(aes(label = n), nudge_y = 3) +
+  labs(y = NULL, x = NULL,
+       title = &amp;quot;Dependent variable based on cargo&amp;quot;,
+       subtitle = &amp;quot;Number of cargoes containing either WP or WC&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-3-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;h3 id=&#34;the-quay-at-amagerværket&#34;&gt;The quay at Amagerværket&lt;/h3&gt;
+&lt;p&gt;One important predictor is &lt;code&gt;quay&lt;/code&gt;. It indicate where the vessel anchor at the
+port. Here we have four possibilities:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;c835&lt;/li&gt;
+&lt;li&gt;c836&lt;/li&gt;
+&lt;li&gt;c837&lt;/li&gt;
+&lt;li&gt;c838&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;tbl &amp;lt;- addmargins(table(vessels$cargo, vessels$quay))
+
+tbl %&amp;gt;%
+  as.data.frame() %&amp;gt;%
+  pivot_wider(names_from = Var2, values_from = Freq) %&amp;gt;%
+  kbl(col.names = c(&amp;quot;&amp;quot;, colnames(tbl)),
+      caption = &amp;quot;Cross tabulation of cargo against quay.&amp;quot;) %&amp;gt;%
+  kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From looking at the pattern in the data and talking to colleagues there is
+some of the quay that is a clear indicator of if the vessel is a WP or WC.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;vessels %&amp;gt;%
+  count(quay) %&amp;gt;%
+  ggplot(aes(x = quay, y = n, fill = quay)) +
+  geom_col(position = &amp;quot;dodge&amp;quot;) +
+  geom_text(aes(label = n), nudge_y = 3) +
+  labs(y = NULL, x = NULL,
+       title = &amp;quot;The Quay is a possible predictor&amp;quot;, 
+       subtitle = &amp;quot;Number of cargoes arriving to the different quay&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-5-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;Here &lt;code&gt;c838&lt;/code&gt; is the quay where WP is being delivered and &lt;code&gt;c836&lt;/code&gt; plus &lt;code&gt;c836&lt;/code&gt; is
+mainly WC.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;vessels %&amp;gt;% 
+  count(quay, cargo) %&amp;gt;% 
+  ggplot(aes(reorder_within(quay, n, cargo), n, fill = quay)) +
+  facet_grid(rows = vars(cargo), scales = &#39;free_y&#39;) +
+  geom_col(position = &amp;quot;dodge&amp;quot;) +
+  geom_text(aes(label = n), nudge_y = 1.9) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(title = &amp;quot;The quay indicate what the cargo is delivering&amp;quot;, 
+       subtitle = &amp;quot;Number of cargoes arriving groped by WC or WP&amp;quot;,
+       y = &amp;quot;&amp;quot;, x = &amp;quot;&amp;quot;) +
+  theme(legend.title = element_blank())
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-6-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;From the above plots it is clear that we can from the quay seperat what the
+vessel is delivering. For c837 this can be considered a joker. It lies between
+the end quay, so our hypothesis is that it can be considered as a waiting
+quay where it can either be WC or WP.&lt;/p&gt;
+&lt;h3 id=&#34;the-loading-port-of-the-cargo&#34;&gt;The loading port of the cargo&lt;/h3&gt;
+&lt;p&gt;Another important predictor we want to include in the models framework is
+&lt;code&gt;arriving_from&lt;/code&gt;. This indicate where the vessel is comming from.
+Here we want to make some investigation if we can use this as a predictor.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;vessels %&amp;gt;% 
+  group_by(arriving_from, cargo) %&amp;gt;% 
+  count(arriving_from, cargo)  %&amp;gt;% 
+  ungroup() %&amp;gt;% 
+  mutate(across(where(is.character), as.factor)) %&amp;gt;% 
+  ggplot(aes(reorder_within(arriving_from, n, cargo), n, fill = cargo)) +
+  geom_col(position = &amp;quot;dodge&amp;quot;) +
+  geom_text(aes(label = n), nudge_y = 0.9) +
+  facet_wrap(~cargo, scales = &amp;quot;free_y&amp;quot;) +
+  coord_flip() +
+  scale_x_reordered() +
+  scale_fill_manual(values=c(&amp;quot;#4099DA&amp;quot;, &amp;quot;#E85757&amp;quot;)) + 
+  labs(title = &amp;quot;Arrival port&amp;quot;,
+       subtitle = &amp;quot;Number of cargoes grouped by arriving from&amp;quot;,
+       y = &amp;quot;&amp;quot;, x = &amp;quot;&amp;quot;) +
+  theme(legend.title = element_blank())
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-7-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;h2 id=&#34;methodology&#34;&gt;Methodology&lt;/h2&gt;
+&lt;p&gt;For solving this supervised classifications task there is different models
+that can be used and we did try out a logistic regression, KNN and decision tree
+model. In the end we went with the logistic regression for classification.&lt;/p&gt;
+&lt;p&gt;In the following section we want to work though the essentiel idea behind the
+method.&lt;/p&gt;
+&lt;h3 id=&#34;the-logistic-regression-model&#34;&gt;The logistic regression model&lt;/h3&gt;
+&lt;p&gt;Logistic regression is a very popular model for classification problems and is
+one of the most commonly used Machine Learning algorithms. It is easy
+to implement and is often used in settings where the dataset is small or as a
+baseline for any binary classification problem.&lt;/p&gt;
+&lt;p&gt;The method is used when the outcome variable is dichotomous in nature. It is a
+special case of the general linear regression model when the outcome variable is
+binary.&lt;/p&gt;
+&lt;p&gt;Let &lt;code&gt;\(y\)&lt;/code&gt; be our binary target with &lt;code&gt;\(y = 1\)&lt;/code&gt; if the vessel carries WC (the WC
+class) and &lt;code&gt;\(y = 0\)&lt;/code&gt; if the cargo is WP (the WP class). Further, let &lt;code&gt;\(x\)&lt;/code&gt; be a
+&lt;code&gt;\(M\)&lt;/code&gt;-vector of features of the observed port calls. Then, given some available
+information &lt;code&gt;\(x\)&lt;/code&gt;, our interest lies in identifying the probability of a WC vessel
+and by implication also the probability of a WP vessel. Hence,
+$$
+\Pr(y = 1 \mid x) = \pi^c(x) = 1 - \Pr(y = 0 \mid x) = 1 - \pi^p(x)
+$$
+where &lt;code&gt;\(\pi^c(x)\)&lt;/code&gt; and &lt;code&gt;\(\pi^p(x)\)&lt;/code&gt; are the conditional probabilities of observing
+respectively a WC or a WP vessel. The probability mass function for this
+Bernoulli distribution is
+$$
+p(y \mid x) = \pi^c(x) \cdot \bigl(1 - \pi^c(x)\bigr)^{1-y}.
+$$&lt;/p&gt;
+&lt;p&gt;In order to proceed from here, one has to make assumptions about the structure
+of the probability &lt;code&gt;\(\pi^c(x)\)&lt;/code&gt;. The assumption used in the logistic regression
+model is to proceed with a logistic function defined by
+$$
+\sigma(z) = \frac{1}{1 + \exp(-z)} = \frac{\exp(z)}{\exp(z) + 1},
+$$
+with
+$$
+z = \phi(x)&amp;rsquo; w
+$$
+and finally impose
+$$
+\pi^c(x) = \sigma(\phi(x)&amp;rsquo; w).
+$$&lt;/p&gt;
+&lt;p&gt;This equation tells that the crux of the logistic regression model is the
+mapping of &lt;code&gt;\(z = \phi(x)&#39; w\)&lt;/code&gt; to a &amp;ldquo;probability&amp;rdquo; through the logistic function.&lt;/p&gt;
+&lt;p&gt;The logistic function gives an S shape curvature. It takes any real vauled
+number and map it into a value between 0 and 1. Here we have in mind of how the
+probability should be interpreted. If we get an value 0.75 this mean that there
+is 75 percent change that a cargo is WC (if WC is baseline).&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;curve({exp(x) / (1 + exp(x))}, -10, 10, xlab = &amp;quot;&amp;quot;, ylab = &amp;quot;&amp;quot;,
+      main = &amp;quot;The logistic function mapping z to the unit interval&amp;quot;)
+abline(v = 0, lty = &amp;quot;dashed&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-8-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;For estimated the parameter logistic regression relies on Maximum likelihood
+estimation (MLE). By this estimation technique the parameter is determined by
+maximizing the log likelihood function. Here we need to use a optimization
+algorithm for finding &lt;code&gt;\(w\)&lt;/code&gt;. Often one uses Gradient acent for this purpose.&lt;/p&gt;
+&lt;p&gt;The coefficents should be read as log of odds so we predicts the probability of
+occurrence of a binary event.&lt;/p&gt;
+&lt;h2 id=&#34;analysis--results&#34;&gt;Analysis &amp;amp; results&lt;/h2&gt;
+&lt;p&gt;For implement the logistic regression we are gonna use the software program &lt;code&gt;R&lt;/code&gt;
+and it machine learning framework &lt;code&gt;tidymodels&lt;/code&gt;. tidymodels has its own unique way
+of structuring a modelling problem and we follows that workflow.&lt;/p&gt;
+&lt;h3 id=&#34;model-formulation-and-data-preprocessing&#34;&gt;Model formulation and data preprocessing&lt;/h3&gt;
+&lt;p&gt;We split our data set in two sets:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;the &lt;em&gt;training set&lt;/em&gt;: This is the bigger part of the data which we use to
+train/estimate of our models&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the &lt;em&gt;test set&lt;/em&gt;: This data we hold out to use for evaluation of our trained
+models&lt;/p&gt;
+&lt;p&gt;Further, we divide our training set into five folds to use for evaluation of
+the models using cross-validation.&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;set.seed(4595)
+
+df &amp;lt;- vessels %&amp;gt;% select(cargo, arriving_from, quay)
+df_split &amp;lt;- initial_split(df, prop = 0.75, strata = cargo)
+df_train &amp;lt;- training(df_split)
+df_test &amp;lt;- testing(df_split)
+df_train_folds &amp;lt;- vfold_cv(df_train, v = 5, strata = &amp;quot;cargo&amp;quot;) # FIXME 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Two model specifications are formulated. One where the cargo is predicted using
+the quay, and one model where the cargo is predicted using the information about
+the port where the vessel is arriving from.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;fml_1 &amp;lt;- formula(cargo ~ quay)
+fml_2 &amp;lt;- formula(cargo ~ arriving_from)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In the prepoceesion step we gonna use &lt;code&gt;recipe&lt;/code&gt; which is part of tidymodels. Here
+we gonna specify what we want to make of changes to the predictors and handling
+other issues. In that step we also could implment a method for solving the
+imbalanced dataset problem, but because it wont give a better result we don´t
+add this step&#39;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_1_rec &amp;lt;-
+  recipe(fml_1, data = df_train) %&amp;gt;% step_dummy(all_nominal(), -all_outcomes())  
+lr_2_rec &amp;lt;-
+  recipe(fml_2, data = df_train) %&amp;gt;% step_dummy(all_nominal(), -all_outcomes())  
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;logistic-regression-model-training&#34;&gt;Logistic regression model training&lt;/h3&gt;
+&lt;p&gt;We train a logistic regression model and use five-fold cross-validation to
+evaluate the model fit. Here we gonna use the recipe from earlier and that and
+the model to &lt;code&gt;workflow&lt;/code&gt; which is handling the information so we easy can make
+predictions.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_mod &amp;lt;- logistic_reg() %&amp;gt;% set_engine(&amp;quot;glm&amp;quot;)
+lr_wfl_1 &amp;lt;- workflow() %&amp;gt;% add_model(lr_mod) %&amp;gt;% add_recipe(lr_1_rec)
+lr_wfl_2 &amp;lt;- workflow() %&amp;gt;% add_model(lr_mod) %&amp;gt;% add_recipe(lr_2_rec)
+lr_wfls &amp;lt;- list(quay = lr_wfl_1, arriving_from = lr_wfl_2)
+
+lr_fits_rs &amp;lt;-
+  lr_wfls %&amp;gt;%
+  imap(~ {
+    fit_resamples(
+      .x,
+      resamples = df_train_folds,
+      control = control_resamples(save_pred = TRUE)
+    )
+  })
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &#39;rlang&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     %@%, as_function, flatten, flatten_chr, flatten_dbl, flatten_int,
+##     flatten_lgl, flatten_raw, invoke, list_along, modify, prepend,
+##     splice
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &#39;package:magrittr&#39;:
+## 
+##     set_names
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &#39;vctrs&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &#39;package:tibble&#39;:
+## 
+##     data_frame
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     data_frame
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ! Fold1: preprocessor 1/1, model 1/1 (predictions): prediction from a rank-defici...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ! Fold2: preprocessor 1/1, model 1/1 (predictions): prediction from a rank-defici...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ! Fold3: preprocessor 1/1, model 1/1 (predictions): prediction from a rank-defici...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ! Fold4: preprocessor 1/1, model 1/1 (predictions): prediction from a rank-defici...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ! Fold5: preprocessor 1/1, model 1/1 (predictions): prediction from a rank-defici...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For the evaluation of the model fit we use the model &lt;em&gt;accuracy&lt;/em&gt; and the
+&lt;em&gt;Receiver Operating characteristic (ROC)&lt;/em&gt; curve which plots the True Positive
+Rate (the sensitivity) against the False Positive Rate (1 - specificity/true
+negative rate). These measures are defined&lt;/p&gt;
+&lt;p&gt;$$
+&lt;code&gt;\begin{aligned} \mathrm{accuracy} &amp;amp;= \frac{\mathrm{TP} + \mathrm{TN}}{N} \\ \text{sensitivity} &amp;amp;= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\ \text{specificity} &amp;amp;= \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FP}} \end{aligned}&lt;/code&gt;
+$$&lt;/p&gt;
+&lt;p&gt;where &lt;code&gt;\(\mathrm{TP}\)&lt;/code&gt; is number of true WP (true positive), &lt;code&gt;\(\mathrm{TN}\)&lt;/code&gt; is the
+number of true WC (true negative), &lt;code&gt;\(\mathrm{FN}\)&lt;/code&gt; is the number of predicted WCs
+which really were WPs (false negative) and &lt;code&gt;\(\mathrm{FP}\)&lt;/code&gt; is the number of
+falsely predicted WP vessels (false positive).&lt;/p&gt;
+&lt;p&gt;The other measure we are gonna use is the &lt;em&gt;classification accuracy&lt;/em&gt;. It is
+the fraction of predictions our model got right.&lt;/p&gt;
+&lt;p&gt;Figure &lt;a href=&#34;#fig:lr-train-roc-curves&#34;&gt;1&lt;/a&gt; shows the trade-off between TRP and 1-FP.
+Classifiers that give curves closer to the top-left corner indicate a better
+performance. Here we see that some gives a perfect prediction.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits_rs %&amp;gt;%
+  imap(~ {
+    collect_predictions(.x) %&amp;gt;%
+      group_by(id) %&amp;gt;%
+      roc_curve(truth = cargo, .pred_WP) %&amp;gt;%
+      autoplot() + ggtitle(.y) + theme_orsted(base_family = &amp;quot;&amp;quot;)
+  }) %&amp;gt;%
+  reduce(`+`)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/lr-train-roc-curves-1.svg&#34; alt=&#34;ROC curves.&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Figure 1: ROC curves.&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;As a final clearification we can look at Table &lt;a href=&#34;#tab:lr-train-mdl-accu&#34;&gt;1&lt;/a&gt;  that
+shows us a clear picture of our cross validation and can conclude that we will
+use quay af a predictor.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits_rs %&amp;gt;%
+  imap_dfr(~ relocate(mutate(collect_metrics(.x), model = .y), model)) %&amp;gt;%
+  kbl(caption = &amp;quot;Model accuracy.&amp;quot;) %&amp;gt;% kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;margin-left: auto; margin-right: auto;&#34;&gt;
+&lt;caption&gt;Table 1: Model accuracy.&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; model &lt;/th&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; .metric &lt;/th&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; .estimator &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; mean &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; n &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; std_err &lt;/th&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; .config &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; accuracy &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; binary &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.9377778 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 5 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.0254830 &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Preprocessor1_Model1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; roc_auc &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; binary &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.9064931 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 5 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.0552653 &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Preprocessor1_Model1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; accuracy &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; binary &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.8556140 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 5 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.0102995 &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Preprocessor1_Model1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; roc_auc &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; binary &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.7748264 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 5 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.0681452 &lt;/td&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; Preprocessor1_Model1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;prediction&#34;&gt;Prediction&lt;/h3&gt;
+&lt;p&gt;Now that we have trained our model on the training data, we test how well it
+does on the test data. We are os course certain that quay is the best predictor
+but we are gonna show the result for both predictors.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;# FIXME prediction from a rank-deficient fit may be misleading. https://stackoverflow.com/a/26560328.
+lr_fits &amp;lt;- lr_wfls %&amp;gt;% map(~ fit(., data = df_train))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits %&amp;gt;%
+  imap(~ {
+    predict(.x, df_test, type = &amp;quot;class&amp;quot;) %&amp;gt;%
+      bind_cols(select(df_test, cargo)) %&amp;gt;%
+      conf_mat(truth = cargo, estimate = .pred_class) %&amp;gt;%
+      autoplot(type = &amp;quot;heatmap&amp;quot;) + ggtitle(.y)
+  }) %&amp;gt;%
+  reduce(`+`)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-14-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits %&amp;gt;%
+  imap_dfr(~ {
+    predict(.x, df_test, type = &amp;quot;prob&amp;quot;) %&amp;gt;% 
+      bind_cols(select(df_test, cargo)) %&amp;gt;%
+      roc_curve(truth = cargo, .pred_WP) %&amp;gt;%
+      mutate(model = .y)
+  }) %&amp;gt;%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, col = model)) + 
+  geom_path(lwd = 1.5, alpha = 0.8) +
+  geom_abline(lty = 3) + 
+  coord_equal() + 
+  scale_color_orsted_d()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src=&#34;/post/2021-01-07-cargo-classification/index.en_files/figure-html/unnamed-chunk-15-1.svg&#34; width=&#34;672&#34; /&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_pred_prob %&amp;gt;% roc_auc(truth = cargo, .pred_WP) %&amp;gt;%  kbl() %&amp;gt;% kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the above result we see that the quay as a predictor has correctly predicted
+every data point in our test set.&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;From our analysis we have created a logistic regression model that predicts if
+the upcomming vessel is arriving with WP or WC to CMport.&lt;/p&gt;
+&lt;p&gt;Our model is using &lt;code&gt;quay&lt;/code&gt; as a predictor and this give us good with a very high
+accuracy.&lt;/p&gt;
+&lt;h2 class=&#34;appendix&#34; id=&#34;estimation-results&#34;&gt;Estimation results&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits[[1]] %&amp;gt;% pull_workflow_fit() %&amp;gt;% tidy() %&amp;gt;% kbl(digits = 2) %&amp;gt;% kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;margin-left: auto; margin-right: auto;&#34;&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; term &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; estimate &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; std.error &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; statistic &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; (Intercept) &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 4.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1.01 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 4.10 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay_c836 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -1.56 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1.45 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -1.08 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.28 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay_c837 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -4.41 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1.26 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -3.49 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; quay_c838 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -6.61 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1.45 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -4.56 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;lr_fits[[2]] %&amp;gt;% pull_workflow_fit() %&amp;gt;% tidy() %&amp;gt;% kbl(digits = 2) %&amp;gt;% kable_styling()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;margin-left: auto; margin-right: auto;&#34;&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style=&#34;text-align:left;&#34;&gt; term &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; estimate &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; std.error &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; statistic &lt;/th&gt;
+   &lt;th style=&#34;text-align:right;&#34;&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; (Intercept) &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20.57 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 10236.63 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Avedörevaerkets.Havn &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Bandholm..Maribo. &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 13541.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Bekkeri &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 14476.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Bremen.Farge &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Cartagena &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Enstedvaerkets.Havn &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 16185.54 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Eydehavn &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 16185.54 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Gdynia &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 13541.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Gent &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 13541.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Greifswald..Landkreis &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 13541.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Grenå &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Huelva &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Köge &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Larvik &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -19.87 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 10236.63 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Leixoes &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Liepaja &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 11444.90 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Lübeck &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 11356.53 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Lyngdal &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Mandal &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Mersrags &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -20.57 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 10236.63 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Papenburg &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Riga &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -19.55 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 10236.63 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Rohukuela &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Rostock &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 13541.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Santana &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 16185.54 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Skulte &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 16185.54 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Stralsund &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 14476.79 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Szczecin &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Szczecinek &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Tallinn &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 16185.54 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Törkopp..Drammen. &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Ventspils &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -19.18 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 10236.63 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Virtsu &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Wismar &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0.00 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Övriga.danska.hamnar &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style=&#34;text-align:left;&#34;&gt; arriving_from_Övriga.estniska.hamnar &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; -41.13 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 20473.27 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 0 &lt;/td&gt;
+   &lt;td style=&#34;text-align:right;&#34;&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;We never use a model&amp;rsquo;s fit to the training set to evaluate the
+model&amp;rsquo;s performance.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Ørsted Classification model</title>
+      <link>/project/%C3%B8rsted-classification/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      <guid>/project/%C3%B8rsted-classification/</guid>
+      <description>&lt;p&gt;At Ørsted we had a problem with cargoes comming from around the word to
+Amagerværket. The cargoes could either carry Wood Pellets or Wood Chips. It
+was every important for the team to know what each cargo were carrying.&lt;/p&gt;
+&lt;p&gt;For solving this problem I found data from scraping the net and made a Machine
+Learning model that classified each cargo.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

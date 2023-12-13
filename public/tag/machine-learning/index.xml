@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Machine Learning | Lucas Bagge</title>
+    <link>/tag/machine-learning/</link>
+      <atom:link href="/tag/machine-learning/index.xml" rel="self" type="application/rss+xml" />
+    <description>Machine Learning</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Lucas Bagge, 2023</copyright><lastBuildDate>Thu, 24 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>Machine Learning</title>
+      <link>/tag/machine-learning/</link>
+    </image>
+    
+    <item>
+      <title>Ørsted Classification model</title>
+      <link>/project/%C3%B8rsted-classification/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      <guid>/project/%C3%B8rsted-classification/</guid>
+      <description>&lt;p&gt;At Ørsted we had a problem with cargoes comming from around the word to
+Amagerværket. The cargoes could either carry Wood Pellets or Wood Chips. It
+was every important for the team to know what each cargo were carrying.&lt;/p&gt;
+&lt;p&gt;For solving this problem I found data from scraping the net and made a Machine
+Learning model that classified each cargo.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

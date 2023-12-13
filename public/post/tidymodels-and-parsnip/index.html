@@ -40,10 +40,13 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
   
   
   
-  <meta name="theme-color" content="#88BDBC">
+  <meta name="theme-color" content="#8486B2">
   
 
   
+  
+  
+  <script src="/js/mathjax-config.js"></script>
   
 
   
@@ -175,9 +178,9 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
 
       
       
-        
-      
 
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
       
     
       
@@ -193,7 +196,7 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
   
   
   
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:100,200,300,400,600,700%7CSource+Code+Pro%7CRoboto%7CRaleway:100,200,300,400,500,600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
   
 
   
@@ -213,8 +216,8 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
   
 
   <link rel="manifest" href="/index.webmanifest">
-  <link rel="icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_32x32_fill_lanczos_center_2.png">
-  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_192x192_fill_lanczos_center_2.png">
+  <link rel="icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_32x32_fill_lanczos_center_3.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hub7cce6fc17a4b537dd89fd523a3d6c48_35686_192x192_fill_lanczos_center_3.png">
 
   <link rel="canonical" href="/post/tidymodels-and-parsnip/">
 
@@ -228,8 +231,8 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
   
   <meta property="twitter:card" content="summary_large_image">
   
-  <meta property="twitter:site" content="@_bcullen">
-  <meta property="twitter:creator" content="@_bcullen">
+  <meta property="twitter:site" content="@_lucasbagge">
+  <meta property="twitter:creator" content="@_lucasbagge">
   
   <meta property="og:site_name" content="Lucas Bagge">
   <meta property="og:url" content="/post/tidymodels-and-parsnip/">
@@ -300,9 +303,6 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
 
 
   
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-  <link rel="stylesheet" href="/css/codefolding.css" />
-
 
   <title>Tidymodels, Random Forest og parsnip | Lucas Bagge</title>
 
@@ -454,6 +454,20 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
         
 
         
+        <li class="nav-item dropdown">
+          <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"><span>CV</span><span class="caret"></span>
+          </a>
+          <div class="dropdown-menu">
+            
+              <a class="dropdown-item" href="/cv/index.html"><span>CV</span></a>
+            
+          </div>
+        </li>
+
+        
+        
+
+        
 
         
         
@@ -488,10 +502,6 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
       </li>
       
 
-      
-      <li class="nav-item">
-        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
-      </li>
       
 
       
@@ -529,19 +539,6 @@ Jeg kommer til at gennemgå og beskrive Random Forest da det er en model, som er
 
   
     
-
-<div id="code-folding-buttons" class="dropdown btn-group pull-right">
-  <a class="btn btn-light btn-lg dropdown-toggle" href="#" role="button" id="allCodeToggleButton"
-     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Code
-  </a>
-  <div class="dropdown-menu" aria-labelledby="allCodeToggleButton">
-    <a id="rmd-show-all-code" class="dropdown-item small" href="#">Show all</a>
-    <a id="rmd-hide-all-code" class="dropdown-item small" href="#">Hide all</a>
-  </div>
-</div>
-
-
 
     
 
@@ -1302,71 +1299,6 @@ præcisionen af modellen.</p>
         </a>
       </li>
     
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://www.facebook.com/sharer.php?u=/post/tidymodels-and-parsnip/&amp;t=Tidymodels,%20Random%20Forest%20og%20parsnip" target="_blank" rel="noopener" class="share-btn-facebook">
-          <i class="fab fa-facebook"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="mailto:?subject=Tidymodels,%20Random%20Forest%20og%20parsnip&amp;body=/post/tidymodels-and-parsnip/" target="_blank" rel="noopener" class="share-btn-email">
-          <i class="fas fa-envelope"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://www.linkedin.com/shareArticle?url=/post/tidymodels-and-parsnip/&amp;title=Tidymodels,%20Random%20Forest%20og%20parsnip" target="_blank" rel="noopener" class="share-btn-linkedin">
-          <i class="fab fa-linkedin-in"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://web.whatsapp.com/send?text=Tidymodels,%20Random%20Forest%20og%20parsnip%20/post/tidymodels-and-parsnip/" target="_blank" rel="noopener" class="share-btn-whatsapp">
-          <i class="fab fa-whatsapp"></i>
-        </a>
-      </li>
-    
-      
-      
-      
-        
-      
-      
-      
-      <li>
-        <a href="https://service.weibo.com/share/share.php?url=/post/tidymodels-and-parsnip/&amp;title=Tidymodels,%20Random%20Forest%20og%20parsnip" target="_blank" rel="noopener" class="share-btn-weibo">
-          <i class="fab fa-weibo"></i>
-        </a>
-      </li>
-    
   </ul>
 </div>
 
@@ -1404,7 +1336,7 @@ præcisionen af modellen.</p>
     <div class="media-body">
       <h5 class="card-title"><a href="/">Lucas Bagge</a></h5>
       <h6 class="card-subtitle">Jr. Data Scientist in Blackwood Seven</h6>
-      <p class="card-text">Data scientist student with interest in the applied neural network.</p>
+      <p class="card-text">Hi my name is Lucas and I love Data Science, math and programming.</p>
       <ul class="network-icon" aria-hidden="true">
   
     
@@ -1434,7 +1366,7 @@ præcisionen af modellen.</p>
       
     
     <li>
-      <a href="https://twitter.com/_bcullen" target="_blank" rel="noopener">
+      <a href="https://twitter.com/lucasbagge" target="_blank" rel="noopener">
         <i class="fab fa-twitter"></i>
       </a>
     </li>
@@ -1451,7 +1383,7 @@ præcisionen af modellen.</p>
       
     
     <li>
-      <a href="https://github.com/brendanhcullen" target="_blank" rel="noopener">
+      <a href="https://github.com/lucasbagge/bagge_blog" target="_blank" rel="noopener">
         <i class="fab fa-github"></i>
       </a>
     </li>
@@ -1571,7 +1503,7 @@ præcisionen af modellen.</p>
     
     
     
-    <script src="/js/academic.min.a0d331bcd05dbe8b31e244f796710f08.js"></script>
+    <script src="/js/academic.min.3b92337b8d2191b40d77e7fc291d6112.js"></script>
 
     
 
@@ -1587,17 +1519,10 @@ præcisionen af modellen.</p>
   
   
   
-   
-  <script>
-  $(document).ready(function () {
-    window.initializeCodeFolding("show" === "hide");
-  });
-  </script>
-  <script src="/js/codefolding.js"></script>
-
+  
 
   <p class="powered-by">
-    © Isabella Benabaye, 2021 &middot; 
+    © Lucas Bagge, 2023 &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
