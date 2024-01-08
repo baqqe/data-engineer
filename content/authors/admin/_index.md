@@ -4,20 +4,22 @@ authors:
 bio: Hi my name is Lucas and I love Data Science, math and programming.
 email: "lucasbagge@hotmail.com"
 interests:
-- Data Science education
+- Analytical Engineering
+- Data Engineering
+- Python
+- DBT
+- Dagster
+- Airflow
 - R & R Markdown
 - Neural network
 - Baysian statistick
 - Shiny
-- Movies
-- Marketing
-- Media analysis
 - Energy
 - Machine Learning
 name: Lucas Bagge
 organizations:
 - name: Lucas Bagge
-role: Jr. Data Scientist in Blackwood Seven
+role: Data Engineer at Nuuday
 social:
 - icon: envelope
   icon_pack: fas
@@ -35,13 +37,4 @@ user_groups:
 - Visitors
 ---
 
-I am a passionate Data Scientist with key interest in how to apply data science
-toolbox in a business and public manner. I have a lot of experience in the
-energy sector and Media Marketing which I have gotten from my jobs at `Ørsted`,
-`Annalect` and `Blackwoodseven`.
-
-As path of my self education I am pursuing every possible data science channels
-at `kaggle` or similar datawarehouses places. 
-
-I am always looking for new at hardere challenges regarding buiding models, tell
-story though data where I use `Shiny` as my great visual tool.
+I am a passionate Data Engineer that will love to give out of my knowledhe.
