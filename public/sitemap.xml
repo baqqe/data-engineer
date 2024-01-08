@@ -2,10 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/post/cargo-classification/</loc>
-    <lastmod>2021-01-07T10:01:17+01:00</lastmod>
+    <loc>/analyticalengineering/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
   </url><url>
     <loc>/categories/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/dataengineering/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/category/data-modelling/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/category/data-warehouse/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/tag/dbt/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/category/dbt/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/dataengineering/dbt-intro/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/tag/sql/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/category/sql/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/tags/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/analyticalengineering/dbt-intro/</loc>
+    <lastmod>2023-12-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/post/cargo-classification/</loc>
     <lastmod>2021-01-07T10:01:17+01:00</lastmod>
   </url><url>
     <loc>/category/classification/</loc>
@@ -14,16 +50,10 @@
     <loc>/tag/logistic-regression/</loc>
     <lastmod>2021-01-07T10:01:17+01:00</lastmod>
   </url><url>
-    <loc>/</loc>
-    <lastmod>2021-01-07T10:01:17+01:00</lastmod>
-  </url><url>
     <loc>/tag/%C3%B8rsted/</loc>
     <lastmod>2021-01-07T10:01:17+01:00</lastmod>
   </url><url>
     <loc>/post/</loc>
-    <lastmod>2021-01-07T10:01:17+01:00</lastmod>
-  </url><url>
-    <loc>/tags/</loc>
     <lastmod>2021-01-07T10:01:17+01:00</lastmod>
   </url><url>
     <loc>/post/test/</loc>

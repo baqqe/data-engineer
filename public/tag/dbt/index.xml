@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>DBT | Lucas Bagge</title>
+    <link>/tag/dbt/</link>
+      <atom:link href="/tag/dbt/index.xml" rel="self" type="application/rss+xml" />
+    <description>DBT</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Lucas Bagge, 2024</copyright><lastBuildDate>Sun, 17 Dec 2023 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/sharing_image.jpg</url>
+      <title>DBT</title>
+      <link>/tag/dbt/</link>
+    </image>
+    
+    <item>
+      <title>DBT Introduction</title>
+      <link>/dataengineering/dbt-intro/</link>
+      <pubDate>Sun, 17 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>/dataengineering/dbt-intro/</guid>
+      <description>
+
+
+&lt;div id=&#34;introduktion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Introduktion&lt;/h2&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

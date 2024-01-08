@@ -4,31 +4,41 @@
 #   The weight parameter defines the order that the links will appear in.
 
 [[main]]
-  name = "ABOUT"
+  name = "About"
   url = "#about"
   weight = 10
 
 [[main]]
-  name = "PROJECTS"
+  name = "Projects"
   url = "/project_landing"
   weight = 20
 
 [[main]]
-  name = "BLOG"
+  name = "Blog"
   url = "/post"
+  weight = 40
+  
+[[main]]
+  name = "Data Engineering"
+  url = "/dataengineering"
+  weight = 40
+  
+[[main]]
+  name = "Analytical Engineering"
+  url = "/analyticalengineering"
   weight = 40
 
 [[main]]
-  name = "CV"
+  name = "Cv"
   identifier = "cv"
   url = "#"
   weight = 50
   
-[[main]]
-  name = "CV"
-  parent = "cv"
-  url = "/cv/index.html"
-  weight = 50.1
+#[[main]]
+#  name = "CV"
+#  parent = "cv"
+#  url = "/cv/index.html"
+#  weight = 50.1
   
 #[[main]]
 #  name = "RÉSUMÉ"

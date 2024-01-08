@@ -2,14 +2,6 @@
 authors:
 - admin
 bio: Hi my name is Lucas and I love Data Science, math and programming.
-education:
-  courses:
-  - course: Data science
-    institution: AU
-    year: 2021
-  - course: BA - Economics
-    institution: SDU
-    year: 2019
 email: "lucasbagge@hotmail.com"
 interests:
 - Data Science education

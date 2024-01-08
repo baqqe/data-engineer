@@ -5,12 +5,26 @@
     <link>/</link>
       <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <description>Lucas Bagge</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Lucas Bagge, 2023</copyright><lastBuildDate>Thu, 07 Jan 2021 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Lucas Bagge, 2024</copyright><lastBuildDate>Sun, 17 Dec 2023 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/img/sharing_image.jpg</url>
       <title>Lucas Bagge</title>
       <link>/</link>
     </image>
+    
+    <item>
+      <title>DBT Introduction</title>
+      <link>/dataengineering/dbt-intro/</link>
+      <pubDate>Sun, 17 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>/dataengineering/dbt-intro/</guid>
+      <description>
+
+
+&lt;div id=&#34;introduktion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Introduktion&lt;/h2&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Cargo classification</title>
