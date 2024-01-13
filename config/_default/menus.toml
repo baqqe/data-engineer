@@ -29,6 +29,11 @@
   weight = 40
 
 [[main]]
+  name = "AI Engineering"
+  url = "/aiengineering"
+  weight = 40
+
+[[main]]
   name = "Cv"
   identifier = "cv"
   url = "#"

@@ -1,0 +1,52 @@
+---
+title: Unleashing the Power of Data Orchestration
+author: Lucas Bagge
+date: '2023-12-17'
+slug: dbt intro
+categories:
+  - DBT
+  - Data Modelling
+  - SQL
+  - Data Warehouse
+tags:
+  - DBT
+  - SQL
+subtitle: ''
+summary: ''
+authors: []
+lastmod: today()
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300, cache.lazy = FALSE,
+                      tidy = "styler", fig.width = 8, fig.height = 5)
+library(tidymodels)
+library(skimr)
+library(tibble)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+```
+
+
+## A Symphony of dbt and Airflow
+
+In the dynamic landscape of data analytics and engineering, efficiency is the key to unlocking actionable insights. Two indispensable tools, dbt (data build tool) and Apache Airflow, emerge as stalwarts in addressing critical challenges that organizations face in managing and transforming their data.
+
+
+## dbt Transforming the Way We Analyze Data
+
+dbt revolutionizes the data transformation process, bringing a breath of fresh air to analysts and data engineers alike. It simplifies the analytics engineering workflow, allowing teams to transform raw data into meaningful insights efficiently. With its modular and version-controlled approach, dbt ensures that data transformations are transparent, reproducible, and collaborative. Analysts can focus on generating insights rather than wrestling with the intricacies of data transformations.
+
+## Airflow Orchestrating the Data Pipeline Symphony
+
+On the other hand, Apache Airflow orchestrates complex data workflows, providing a robust platform for scheduling, monitoring, and managing data tasks. From simple data transfers to intricate ETL (Extract, Transform, Load) processes, Airflow empowers data engineers to design and execute data pipelines with precision. The open-source nature of Airflow fosters a vibrant ecosystem, allowing users to integrate it seamlessly into their existing tech stack.
+
